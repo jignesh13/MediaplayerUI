@@ -1,5 +1,5 @@
 # JK Player
-Using above project now you can play any video on your device using exoplayer with beautiful user interface
+JK Player is Powerful video player which play video on your device with advanced hardware acceleration
 
  # Special thanks to these contributors
 [Exoplayer](https://github.com/google/ExoPlayer)
