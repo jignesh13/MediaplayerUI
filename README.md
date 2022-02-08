@@ -1,5 +1,5 @@
 # JK Player
-using exoplayer to create great user interface for volumebar and seekbar
+Using above project now you can play any video on your device using exoplayer with beautiful user interface
 
  # Special thanks to these contributors
 [Exoplayer](https://github.com/google/ExoPlayer)
