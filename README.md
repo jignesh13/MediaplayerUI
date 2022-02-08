@@ -1,6 +1,35 @@
 # JK Player
 JK Player is Powerful video player which play video on your device with advanced hardware acceleration
 
+ ## feature
+✔️ Hardware acceleration can be applied in JK Player for faster decoding and perfomance improvement
+
+✔️ JK Player is the video player which supports multi-core decoding.
+
+✔️ Easily maintain different aspect ratio of video
+
+✔️ Using touch gestures throw maintain video sound
+
+✔️ Using touch gestures throw maintain video seek position
+
+✔️ Normal and full screen display
+
+✔️ maintain playlist of video
+
+✔️ automatically maintain screen oriention based on video size
+
+✔️ No ads or annoying popups
+
+✔️ Child lock without worry for your kids to make phone call or sms
+
+✔️ supported video format mp4, mkv, M4A, FMP4, FLV etc
+
+✔️ No internet access needed, giving you more privacy & security
+
+✔️ Only the bare minimum permissions required
+
+✔️ Open source
+
  # Special thanks to these contributors
 [Exoplayer](https://github.com/google/ExoPlayer)
  
