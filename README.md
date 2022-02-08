@@ -2,7 +2,7 @@
 JK Player is Powerful video player which play video on your device with advanced hardware acceleration
 ## Demo
 
-[![Demo Doccou alpha](https://github.com/jignesh13/MediaplayerUI/blob/master/file_example_MP4_480_1_5MG.mp4)](https://www.youtube.com/watch?v=ek1j272iAmc)
+https://user-images.githubusercontent.com/20221469/152984171-59d99c98-ca89-4b1b-b312-30ace1b9e5cb.mp4
 
  ## feature
 ✔️ Hardware acceleration can be applied in JK Player for faster decoding and perfomance improvement
