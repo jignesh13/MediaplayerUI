@@ -17,6 +17,7 @@ import android.util.Size;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.Timeline;
@@ -70,11 +72,14 @@ public class MainActivity extends AppCompatActivity {
     private long currentitemseek;
     private boolean isdonebyus;
     private int ontouchpos;
-    private static int resizemode=1;
+    private static boolean isplaybackground;
+    private static boolean isorientionchange;
+    private static int resizemode=0;
     private static int anInt=0;
     private TextView videotitle;
   private  Handler hidehandler;
   private static boolean islock;
+  private static int playbackspeed=5;
     private ArrayList<VideoModel> videoModels = new ArrayList<>();
 
     private String[] aspectmode={"FIT","FILL","ZOOM","FIXED HEIGHT","FIXED WIDTH"};
@@ -121,20 +126,28 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("resource", resource.getWidth() + "," + resource.getHeight());
                         boolean islandscape = resource.getWidth() > resource.getHeight();
                         int orientation = MainActivity.this.getResources().getConfiguration().orientation;
-                        if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
-                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                            return;
-
-                        }
-                        else if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-                            return;
-
-                        }
-                        else{
-
+                        if(isorientionchange){
                             initview();
+                            isorientionchange=false;
                         }
+                        else {
+                            isorientionchange=false;
+                            if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                                return;
+
+                            }
+                            else if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+                                return;
+
+                            }
+                            else{
+
+                                initview();
+                            }
+                        }
+
                     }
                 });
 
@@ -148,8 +161,10 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("oncreate", "oncreate");
 
+        View speedView=findViewById(R.id.speedview);
         isshow = false;
         hidehandler=new Handler();
+
 
          videotitle=findViewById(R.id.videotitle);
 
@@ -169,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
         player = new ExoPlayer.Builder(this).build();
 
         playerView = findViewById(R.id.player);
+
         playerView.setPlayer(player);
 
 //http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
@@ -182,6 +198,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.rotateview).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int orientation = MainActivity.this.getResources().getConfiguration().orientation;
+                isorientionchange=true;
+
+                if(orientation==Configuration.ORIENTATION_PORTRAIT){
+
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                }
+                else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+                }
+            }
+        });
         findViewById(R.id.imageButton2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -197,21 +228,27 @@ public class MainActivity extends AppCompatActivity {
                                     boolean islandscape = resource.getWidth() > resource.getHeight();
                                     int orientation = MainActivity.this.getResources().getConfiguration().orientation;
                                     if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                        player.stop();
+                                        player.release();
                                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                                         return;
 
                                     }
                                     if(islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE){
+                                        player.stop();
                                         intializePlayer();
                                         startPlayer();
                                         return;
                                     }
                                     if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                        player.stop();
+                                        player.release();
                                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
                                         return;
 
                                     }
                                     if (!islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                        player.stop();
                                         intializePlayer();
                                         startPlayer();
                                         return;
@@ -239,21 +276,28 @@ public class MainActivity extends AppCompatActivity {
                                     boolean islandscape = resource.getWidth() > resource.getHeight();
                                     int orientation = MainActivity.this.getResources().getConfiguration().orientation;
                                     if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                        player.stop();
+                                        player.release();
                                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                                         return;
 
                                     }
                                     if(islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE){
+                                        player.stop();
                                         intializePlayer();
                                         startPlayer();
                                         return;
                                     }
                                     if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                        player.stop();
+                                        player.release();
                                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
                                         return;
 
                                     }
                                     if (!islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                        player.stop();
+
                                         intializePlayer();
                                         startPlayer();
                                         return;
@@ -267,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                if(player==null)return;
                 if (!isdonebyus) dragseek.setProgress((int) player.getCurrentPosition());
                 //  currentprogresslbl.setText(milltominute(player.getCurrentPosition()));
                 handler.postDelayed(this::run, 1000);
@@ -275,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
         Runnable hiderunnable=new Runnable() {
             @Override
             public void run() {
+                if(player==null)return;
                 if (player.isPlaying()) {
                     hideSystemUI();
                     bottomview.setVisibility(View.GONE);
@@ -287,10 +333,11 @@ public class MainActivity extends AppCompatActivity {
         aspectbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                resizemode++;
                 aspecttext.setVisibility(View.VISIBLE);
                 aspecttext.setText(aspectmode[resizemode%5]);
                 aspectbtn.setImageResource(resource[resizemode%5]);
-                playerView.setResizeMode(resizemode++ % 5);
+                playerView.setResizeMode(resizemode % 5);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -333,21 +380,28 @@ public class MainActivity extends AppCompatActivity {
                                         boolean islandscape = resource.getWidth() > resource.getHeight();
                                         int orientation = MainActivity.this.getResources().getConfiguration().orientation;
                                         if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                            player.stop();
+                                            player.release();
                                             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                                             return;
 
                                         }
                                         if(islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE){
+                                            player.stop();
                                             intializePlayer();
                                             startPlayer();
                                             return;
                                         }
                                         if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                            player.stop();
+                                            player.release();
                                             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
                                             return;
 
                                         }
                                         if (!islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                            player.stop();
+
                                             intializePlayer();
                                             startPlayer();
                                             return;
@@ -397,6 +451,24 @@ public class MainActivity extends AppCompatActivity {
         TextView progresstext = findViewById(R.id.progresstext);
         ImageView volumeview = findViewById(R.id.volumeicon);
         View volumecontainerView = findViewById(R.id.volumecontainer);
+        View muteview=findViewById(R.id.muteview);
+        muteview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(soundView.getProgress()==0){
+                    muteview.setBackgroundResource(R.drawable.roundbg);
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 7, 0);
+                    soundView.setProgress(7);
+                }
+                else {
+                    muteview.setBackgroundResource(R.drawable.colorroundbg);
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+                    soundView.setProgress(0);
+                }
+
+
+            }
+        });
         soundView.setOnsoundProgressChangeListner(new SoundProgressChangeListner() {
             @Override
             public void onchange(int progress) {
@@ -404,14 +476,35 @@ public class MainActivity extends AppCompatActivity {
                 progresstext.setText(progress + "");
                 if (progress == 0) {
                     volumeview.setImageResource(R.drawable.ic_baseline_volume_off_24);
+
                 } else {
                     volumeview.setImageResource(R.drawable.ic_baseline_volume_up_24);
+                    muteview.setBackgroundResource(R.drawable.roundbg);
                 }
 
 
             }
         });
+        View headsetview=findViewById(R.id.headsetview);
 
+        if(isplaybackground){
+            headsetview.setBackgroundResource(R.drawable.colorroundbg);
+        }
+        else {
+            headsetview.setBackgroundResource(R.drawable.roundbg);
+        }
+        headsetview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isplaybackground = !isplaybackground;
+                if(isplaybackground){
+                    headsetview.setBackgroundResource(R.drawable.colorroundbg);
+                }
+                else {
+                    headsetview.setBackgroundResource(R.drawable.roundbg);
+                }
+            }
+        });
 
         touchview.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -518,6 +611,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         if (motionEvent.getX() == putx && motionEvent.getY() == puty && System.currentTimeMillis() - lasttime <= 1000) {
+                          speedView.setVisibility(View.GONE);
                             if (isshow) {
                                 hideSystemUI();
                                 bottomview.setVisibility(View.GONE);
@@ -591,6 +685,45 @@ public class MainActivity extends AppCompatActivity {
         soundView.setMaxprogress(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         soundView.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
         intializePlayer();
+        Button speedbtn = findViewById(R.id.speedbtn);
+        speedbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                speedView.setVisibility(View.VISIBLE);
+            }
+        });
+        SeekBar speedseekbar=findViewById(R.id.speedseekbar);
+        TextView speedtextview=findViewById(R.id.speedtextview);
+        speedseekbar.setProgress(playbackspeed);
+        speedbtn.setText(0.5f+(playbackspeed/10.0f)+"X");
+        speedtextview.setText(0.5f+(playbackspeed/10.0f)+"X");
+        speedseekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                playbackspeed=i;
+                PlaybackParameters param = new PlaybackParameters(0.5f+(playbackspeed/10.0f));
+                player.setPlaybackParameters(param);
+                speedbtn.setText(0.5f+(playbackspeed/10.0f)+"X");
+                speedtextview.setText(0.5f+(playbackspeed/10.0f)+"X");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        speedView.setVisibility(View.GONE);
+                    }
+                },3000);
+            }
+        });
+
         startPlayer();
     }
     public void intializePlayer() {
@@ -598,7 +731,8 @@ public class MainActivity extends AppCompatActivity {
 
         Uri uri = Uri.parse(videoModels.get(currentitem).getUrl());
         MediaItem mediaItem = MediaItem.fromUri(uri);
-        player.setMediaItem(mediaItem,0);
+        player.setMediaItem(mediaItem,currentitemseek);
+        currentitemseek=0;
         videotitle.setText(videoModels.get(currentitem).getName());
         player.prepare();
 
@@ -669,7 +803,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        pausePlayer();
+        if(!isplaybackground)pausePlayer();
 
     }
 
@@ -698,7 +832,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("currentitem", currentitem);
-        outState.putLong("currentitemseek", 0);
+        if(isorientionchange)outState.putLong("currentitemseek", player.getCurrentPosition());
 
     }
 
@@ -713,7 +847,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     private void pausePlayer() {
@@ -723,10 +856,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startPlayer() {
-        player.setPlayWhenReady(true);
+        player.play();
         Log.e("size", "startplayer");
 
     }
+
+    @Override
+    protected void onDestroy() {
+       if(player!=null){
+           player.stop();
+       player.setVideoSurface(null);
+        player.release();
+       }
+
+       Log.e("destroy","destroy");
+        //player.setVideoSurface(null);
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        Log.e("detach","onDetachedFromWindow");
+//
+
+        super.onDetachedFromWindow();
+    }
+
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {

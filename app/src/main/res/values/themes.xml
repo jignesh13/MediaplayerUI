@@ -19,6 +19,9 @@
 
         <item name="android:statusBarColor">@color/primaryColor</item>
     </style>
+    <style name="SeekBarWithoutSteps" parent="Base.Widget.AppCompat.SeekBar.Discrete">
+        <item name="tickMark">@null</item>
+    </style>
     <style name="RobotoBoldTextAppearance" >
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:textSize">18sp</item>
