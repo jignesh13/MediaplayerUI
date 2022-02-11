@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.mediaplayer.ui">
 
     <application
@@ -19,9 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" android:theme="@style/Theme.MyApplication" android:screenOrientation="portrait"></activity>
+        <activity android:name=".MainActivity" android:theme="@style/Theme.MyApplication" android:screenOrientation="unspecified"></activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 

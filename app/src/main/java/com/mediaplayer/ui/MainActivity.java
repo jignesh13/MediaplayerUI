@@ -1,5 +1,6 @@
 package com.mediaplayer.ui;
 
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -15,6 +16,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.util.Util;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -54,20 +57,22 @@ public class MainActivity extends AppCompatActivity {
     private float endheight;
     private float diffheight;
     private int currentprogress;
+    private int currentbrightprogress;
     private int currentseek;
     private Handler handler;
     private float lastx;
     private float putx, puty;
     private float trackx;
-    private float finalwidth;
     private int lastprogress;
     private long lasttime;
     private int selected = 0;
     private boolean isshow;
+    private float scaleFactor = 1.0f;
     private PlayerView playerView;
     private boolean first = true, second = true, third = true;
     private ExoPlayer player;
     private SeekBar dragseek;
+    private TextView aspecttext;
     private int currentitem;
     private long currentitemseek;
     private boolean isdonebyus;
@@ -75,20 +80,22 @@ public class MainActivity extends AppCompatActivity {
     private static boolean isplaybackground;
     private static boolean isorientionchange;
     private static int resizemode=0;
-    private static int anInt=0;
+    private boolean isscalegesture;
     private TextView videotitle;
+    private float savebright=-1.0f;
   private  Handler hidehandler;
   private static boolean islock;
   private static int playbackspeed=5;
     private ArrayList<VideoModel> videoModels = new ArrayList<>();
 
     private String[] aspectmode={"FIT","FILL","ZOOM","FIXED HEIGHT","FIXED WIDTH"};
-    private int[] resource={R.drawable.ic_fit_to_screen,R.drawable.ic_baseline_crop_landscape_24,R.drawable.ic_baseline_crop_portrait_24,R.drawable.ic_scale_fit,R.drawable.ic_baseline_fullscreen_24};
+    private int[] resource={R.drawable.ic_zoom_stretch,R.drawable.ic_baseline_crop_3_2_24,R.drawable.ic_crop_white_24dp,R.drawable.ic_zoom_inside,R.drawable.ic_zoom_original};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 
         super.onCreate(savedInstanceState);
+        scaleFactor=1.0f;
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             currentitem = bundle.getInt("pos", 0);
@@ -100,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             currentitem = savedInstanceState.getInt("currentitem", 0);
             currentitemseek = savedInstanceState.getLong("currentitemseek", 0);
+            savebright=savedInstanceState.getFloat("windowbright",-1.0f);
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -110,12 +118,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hideSystemUI();
-            }
-        },50);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                hideSystemUI();
+//            }
+//        },50);
 
         Glide.with(MainActivity.this)
                 .asBitmap()
@@ -158,6 +166,17 @@ public class MainActivity extends AppCompatActivity {
     public void initview(){
 
         setContentView(R.layout.activity_main);
+        findViewById(R.id.backarrow).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        if(savebright>=0){
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.screenBrightness = savebright;
+            getWindow().setAttributes(lp);
+        }
 
         Log.e("oncreate", "oncreate");
 
@@ -312,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if(player==null)return;
+
                 if (!isdonebyus) dragseek.setProgress((int) player.getCurrentPosition());
                 //  currentprogresslbl.setText(milltominute(player.getCurrentPosition()));
                 handler.postDelayed(this::run, 1000);
@@ -329,12 +349,21 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         aspectbtn.setImageResource(resource[resizemode%5]);
-        TextView aspecttext=findViewById(R.id.aspecttext);
+         aspecttext=findViewById(R.id.aspecttext);
         aspectbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 resizemode++;
                 aspecttext.setVisibility(View.VISIBLE);
+                if((resizemode%5)!=2){
+                    playerView.setScaleX(1.0f);
+                    playerView.setScaleY(1.0f);
+
+                }
+                else {
+                    playerView.setScaleX(scaleFactor);
+                    playerView.setScaleY(scaleFactor);
+                }
                 aspecttext.setText(aspectmode[resizemode%5]);
                 aspectbtn.setImageResource(resource[resizemode%5]);
                 playerView.setResizeMode(resizemode % 5);
@@ -452,6 +481,9 @@ public class MainActivity extends AppCompatActivity {
         ImageView volumeview = findViewById(R.id.volumeicon);
         View volumecontainerView = findViewById(R.id.volumecontainer);
         View muteview=findViewById(R.id.muteview);
+        SoundView brightView = findViewById(R.id.brightview);
+        TextView brightprogresstext = findViewById(R.id.brightprogresstext);
+        View brightcontainer = findViewById(R.id.brightcontainer);
         muteview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -466,6 +498,13 @@ public class MainActivity extends AppCompatActivity {
                     soundView.setProgress(0);
                 }
 
+
+            }
+        });
+        brightView.setOnsoundProgressChangeListner(new SoundProgressChangeListner() {
+            @Override
+            public void onchange(int progress) {
+                brightprogresstext.setText(progress + "");
 
             }
         });
@@ -505,12 +544,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
+        ScaleGestureDetector scaleGestureDetector=new ScaleGestureDetector(this,new MyOnScaleGestureListener());
         touchview.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                Log.e("pointer",motionEvent.getPointerCount()+","+motionEvent.getAction());
+                if(!islock)scaleGestureDetector.onTouchEvent(motionEvent);
+                if(motionEvent.getAction()==MotionEvent.ACTION_POINTER_2_DOWN&&motionEvent.getPointerCount()==2){
+                    isscalegesture=true;
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN&&!isscalegesture) {
                     lastx = motionEvent.getX();
                     downy = motionEvent.getY();
                     putx = motionEvent.getX();
@@ -519,6 +562,7 @@ public class MainActivity extends AppCompatActivity {
                     endheight = downy - getResources().getDimensionPixelSize(R.dimen.widthmeasure);
                     diffheight = endheight - downy;
                     currentprogress = soundView.getProgress();
+                    currentbrightprogress=brightView.getProgress();
                     first = true;
                     second = true;
                     third = true;
@@ -526,10 +570,10 @@ public class MainActivity extends AppCompatActivity {
                     isdonebyus = false;
                     trackx = motionEvent.getX();
                     currentseek = dragseek.getProgress();
-                    finalwidth = motionEvent.getX() + touchview.getWidth();
+
                     Log.e("width", touchview.getWidth() + "");
 
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE&&!isscalegesture) {
                    if(islock)return false;
                     Log.e("myrb", "x=" + lastx + "y=" + downy + "");
                     Log.e("myrb", "x=" + motionEvent.getX() + "y=" + motionEvent.getY() + "," + motionEvent.getAction());
@@ -544,20 +588,41 @@ public class MainActivity extends AppCompatActivity {
                             first = false;
                             second = true;
                             third = false;
-                            volumecontainerView.setVisibility(View.VISIBLE);
+                            if(motionEvent.getX()>view.getWidth()/2.0f){
+                                volumecontainerView.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                brightcontainer.setVisibility(View.VISIBLE);
+                            }
                         }
                         float tempwidth = endheight - motionEvent.getY();
                         float progress = (tempwidth * soundView.getMaxprogess()) / diffheight;
                         Log.e("progress", (soundView.getMaxprogess() - progress) + "");
                         int jprogress = (int) (soundView.getMaxprogess() - progress);
-                        int prog = currentprogress + jprogress;
+                        if(volumecontainerView.getVisibility()==View.VISIBLE){
+                            int prog = currentprogress + jprogress;
+                            if (prog > soundView.getMaxprogess())
+                                soundView.setProgress(soundView.getMaxprogess());
+                            else if (prog < 0) soundView.setProgress(0);
+                            else {
+                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, prog, 0);
+                                soundView.setProgress(prog);
+                            }
 
-                        if (prog > soundView.getMaxprogess())
-                            soundView.setProgress(soundView.getMaxprogess());
-                        else if (prog < 0) soundView.setProgress(0);
+                        }
                         else {
-                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, prog, 0);
-                            soundView.setProgress(prog);
+                            int prog = currentbrightprogress + jprogress;
+                            if (prog > brightView.getMaxprogess())
+                                brightView.setProgress(brightView.getMaxprogess());
+                            else if (prog < 0) brightView.setProgress(0);
+                            else {
+                                float brightness = prog/ 15.0f;
+                                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                                lp.screenBrightness = brightness;
+                                getWindow().setAttributes(lp);
+
+                                brightView.setProgress(prog);
+                            }
                         }
 
                         Log.e("scroll", "vertical");
@@ -594,52 +659,62 @@ public class MainActivity extends AppCompatActivity {
                     }
                     lastx = motionEvent.getX();
                     downy = motionEvent.getY();
-                } else {
-                    seeklay.setVisibility(View.GONE);
-                    if (isdonebyus) player.play();
-                    isdonebyus = false;
-                    if(islock){
-                        if(unlockbtn.getVisibility()==View.GONE){
-                            unlockbtn.setVisibility(View.VISIBLE);
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    unlockbtn.setVisibility(View.GONE);
-                                }
-                            },2000);
-                        }
+                } else if(motionEvent.getPointerCount()==1&&motionEvent.getAction()==MotionEvent.ACTION_UP){
+                    if(isscalegesture){
+                        isscalegesture=false;
                     }
                     else {
-                        if (motionEvent.getX() == putx && motionEvent.getY() == puty && System.currentTimeMillis() - lasttime <= 1000) {
-                          speedView.setVisibility(View.GONE);
-                            if (isshow) {
-                                hideSystemUI();
-                                bottomview.setVisibility(View.GONE);
-                                toolbar.setVisibility(View.GONE);
-                            } else {
-                                showSystemUI();
-                                playpausebutton.setVisibility(View.VISIBLE);
-                                bottomview.setVisibility(View.VISIBLE);
-                                toolbar.setVisibility(View.VISIBLE);
-                                hidehandler.postDelayed(hiderunnable,4000);
-
+                        seeklay.setVisibility(View.GONE);
+                        if (isdonebyus) player.play();
+                        isdonebyus = false;
+                        if(islock){
+                            if(unlockbtn.getVisibility()==View.GONE){
+                                unlockbtn.setVisibility(View.VISIBLE);
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        unlockbtn.setVisibility(View.GONE);
+                                    }
+                                },2000);
                             }
-                        } else {
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-
+                        }
+                        else {
+                            if (motionEvent.getX() == putx && motionEvent.getY() == puty && System.currentTimeMillis() - lasttime <= 1000) {
+                                speedView.setVisibility(View.GONE);
+                                if (isshow) {
                                     hideSystemUI();
-                                    volumecontainerView.setVisibility(View.INVISIBLE);
                                     bottomview.setVisibility(View.GONE);
                                     toolbar.setVisibility(View.GONE);
+                                } else {
+                                    showSystemUI();
                                     playpausebutton.setVisibility(View.VISIBLE);
+                                    bottomview.setVisibility(View.VISIBLE);
+                                    toolbar.setVisibility(View.VISIBLE);
+                                    hidehandler.postDelayed(hiderunnable,4000);
 
                                 }
-                            }, 300);
+                            } else {
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        hideSystemUI();
+                                        volumecontainerView.setVisibility(View.INVISIBLE);
+                                        brightcontainer.setVisibility(View.INVISIBLE);
+                                        bottomview.setVisibility(View.GONE);
+                                        toolbar.setVisibility(View.GONE);
+                                        playpausebutton.setVisibility(View.VISIBLE);
+
+                                    }
+                                }, 300);
+                            }
                         }
                     }
 
+
+
+                }
+                else if(isscalegesture){
 
                 }
 
@@ -684,6 +759,13 @@ public class MainActivity extends AppCompatActivity {
        });
         soundView.setMaxprogress(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         soundView.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+
+        float tempbright=getWindow().getAttributes().screenBrightness;
+        if(tempbright<0)tempbright=0.5f;
+        int mybright= (int) (15*tempbright);
+        brightView.setMaxprogress(soundView.getMaxprogess());
+        brightView.setProgress(mybright);
+
         intializePlayer();
         Button speedbtn = findViewById(R.id.speedbtn);
         speedbtn.setOnClickListener(new View.OnClickListener() {
@@ -700,6 +782,7 @@ public class MainActivity extends AppCompatActivity {
         speedseekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+
                 playbackspeed=i;
                 PlaybackParameters param = new PlaybackParameters(0.5f+(playbackspeed/10.0f));
                 player.setPlaybackParameters(param);
@@ -739,7 +822,49 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    public class MyOnScaleGestureListener extends
+            ScaleGestureDetector.SimpleOnScaleGestureListener {
 
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            scaleFactor *= detector.getScaleFactor();
+
+
+            if(scaleFactor>4||scaleFactor<0.25) {
+                return true;
+            }
+            else {
+                playerView.setScaleX(scaleFactor);
+                playerView.setScaleY(scaleFactor);
+                float per=(1000*scaleFactor)/4.5f;
+                aspecttext.setText((int)per+"%");
+                Log.e("zoomper",per+"");
+
+                if (detector.getScaleFactor() > 1) {
+                    Log.e("zoomout", scaleFactor + "");
+                } else {
+                    Log.e("zoomin", scaleFactor + "");
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            aspecttext.setVisibility(View.VISIBLE);
+
+            scaleFactor=playerView.getScaleX();
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            aspecttext.setVisibility(View.GONE);
+            scaleFactor=playerView.getScaleX();
+        }
+    }
     public Size getVideoWidthOrHeight(File file, String widthOrHeight) throws IOException {
         MediaMetadataRetriever retriever = null;
         Bitmap bmp = null;
@@ -832,6 +957,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("currentitem", currentitem);
+        outState.putFloat("windowbright",getWindow().getAttributes().screenBrightness);
         if(isorientionchange)outState.putLong("currentitemseek", player.getCurrentPosition());
 
     }
@@ -847,6 +973,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        hideSystemUI();
     }
 
     private void pausePlayer() {
@@ -863,6 +990,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        hideSystemUI();
        if(player!=null){
            player.stop();
        player.setVideoSurface(null);
@@ -889,9 +1017,17 @@ public class MainActivity extends AppCompatActivity {
         super.onWindowFocusChanged(hasFocus);
         Log.e("Focus",hasFocus+"");
         if (hasFocus) {
-           // hideSystemUI();
+            //
         }
    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Log.e("Focus","onAttachedToWindow");
+      //  hideSystemUI();
+    }
+
 
     private void hideSystemUI() {
 
