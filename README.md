@@ -15,9 +15,11 @@ https://raw.githubusercontent.com/jignesh13/MediaplayerUI/jignesh13-patch-1/app-
 
 ✔️ Easily maintain different aspect ratio of video
 
-✔️ Using touch gestures throw maintain video sound
+✔️ Using touch gestures throw maintain video sound same like MX Player
 
-✔️ Using touch gestures throw maintain video seek position
+✔️ Using touch gestures throw maintain video seek position same like MX Player
+
+✔️ maintain scale of video player using scalegesture
 
 ✔️ Normal and full screen display
 
