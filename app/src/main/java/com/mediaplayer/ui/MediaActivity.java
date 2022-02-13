@@ -39,10 +39,17 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class MediaActivity extends AppCompatActivity {
 
     private ArrayList<VideoModel> videoModels=new ArrayList<>();
+    private String foldername;
+    List<String> latestid=new ArrayList<>();
+    private RecyclerView recyclerView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,14 +60,14 @@ public class MediaActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Bundle bundle=getIntent().getExtras();
         if(bundle!=null){
-
-          getSupportActionBar().setTitle(bundle.getString("foldername"));
-            Gson gson = new Gson();
-            Type listOfdoctorType = new TypeToken<ArrayList<VideoModel>>() {}.getType();
-           videoModels = gson.fromJson(bundle.getString("jsondata"),listOfdoctorType );
+            foldername=bundle.getString("foldername");
+          getSupportActionBar().setTitle(foldername);
+//            Gson gson = new Gson();
+//            Type listOfdoctorType = new TypeToken<ArrayList<VideoModel>>() {}.getType();
+//           videoModels = gson.fromJson(bundle.getString("jsondata"),listOfdoctorType );
 
         }
-        RecyclerView recyclerView=findViewById(R.id.mediarecyclerview);
+         recyclerView=findViewById(R.id.mediarecyclerview);
         final GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -79,6 +86,25 @@ public class MediaActivity extends AppCompatActivity {
         recyclerView.setAdapter(new MyMediaAdapter());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MediaModel mediaModel= Utility.getAllMedia(this);
+        videoModels= (ArrayList<VideoModel>) mediaModel.getListHashMap().get(foldername);
+        if(videoModels==null)videoModels=new ArrayList<>();
+       Collections.sort(videoModels, new Comparator<VideoModel>() {
+           @Override
+           public int compare(VideoModel t1, VideoModel t2) {
+               return t1.getName().toLowerCase().compareTo(t2.getName().toLowerCase());
+           }
+       });
+
+        latestid=Utility.checklatest(this,mediaModel.getListHashMap(),mediaModel.getIdlist()).get(foldername);
+        Log.e("latestid",latestid+"");
+        if(latestid==null)latestid=new ArrayList<>();
+        recyclerView.getAdapter().notifyDataSetChanged();
+
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -114,6 +140,13 @@ public class MediaActivity extends AppCompatActivity {
                     .placeholder(R.drawable.placeholder)
                  .into(holder.thumbnail);
             holder.titletext.setText(videoModels.get(position).getName());
+            holder.durationtext.setText(videoModels.get(position).getDuration());
+            if(latestid.contains(videoModels.get(position).getMediaid()+"")){
+                holder.newlabel.setVisibility(View.VISIBLE);
+            }
+            else {
+                holder.newlabel.setVisibility(View.INVISIBLE);
+            }
         }
 
 
@@ -126,17 +159,23 @@ public class MediaActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView thumbnail;
             public TextView titletext;
+            public TextView durationtext;
+            public TextView newlabel;
             public ViewHolder(View itemView) {
                 super(itemView);
                 this.thumbnail = (ImageView) itemView.findViewById(R.id.imageView2);
                 this.titletext=itemView.findViewById(R.id.textView);
+                this.durationtext=itemView.findViewById(R.id.duration);
+                this.newlabel=itemView.findViewById(R.id.newlabel);
+
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                      Bundle bundle =   MediaActivity.this.getIntent().getExtras();
                      if(bundle!=null){
+                         Gson gson=new Gson();
                          Intent intent=new Intent(MediaActivity.this,MainActivity.class);
-                         intent.putExtra("jsondata",bundle.getString("jsondata"));
+                         intent.putExtra("jsondata",gson.toJson(videoModels));
                          intent.putExtra("pos",getAdapterPosition());
                          startActivity(intent);
                      }

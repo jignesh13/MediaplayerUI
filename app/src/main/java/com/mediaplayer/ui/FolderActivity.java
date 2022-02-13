@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,9 +30,13 @@ import android.widget.TextView;
 
 import com.google.android.exoplayer2.MediaItem;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +44,8 @@ import java.util.List;
 public class FolderActivity extends AppCompatActivity {
     private MyListAdapter myListAdapter;
     private HashMap<String, List<VideoModel>> videodata;
+    private HashMap<String,List<String>> latestvideo=new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +60,15 @@ public class FolderActivity extends AppCompatActivity {
 
         myListAdapter=new MyListAdapter(null);
         folderrecycleview.setAdapter(myListAdapter);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,100);
     }
+
     public void checkPermission(String permission, int requestCode)
     {
         // Checking if permission is not granted
@@ -62,12 +77,25 @@ public class FolderActivity extends AppCompatActivity {
         }
         else {
             //permission already accept
-            videodata=getAllMedia();
-           String[] keyset= (String[]) videodata.keySet().toArray(new String[videodata.size()]);
+            MediaModel mediaModel=Utility.getAllMedia(this);
+            videodata=mediaModel.getListHashMap();
+            String[] keyset= (String[]) videodata.keySet().toArray(new String[videodata.size()]);
+
+           latestvideo = Utility.checklatest(this,videodata,mediaModel.getIdlist());
+            Arrays.sort(keyset, new Comparator<String>() {
+                @Override
+                public int compare(String s1, String s2) {
+                    return s1.toLowerCase().compareTo(s2.toLowerCase());
+                }
+            });
+            Log.e("latestinfo",keyset.toString());
+
            myListAdapter.setListdata(keyset);
            myListAdapter.notifyDataSetChanged();
         }
     }
+
+
     // This function is called when user accept or decline the permission.
 // Request Code is used to check which permission called this function.
 // This request code is provided when user is prompt for permission.
@@ -77,9 +105,18 @@ public class FolderActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(requestCode==100&&grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            //permission accept
-            videodata=getAllMedia();
+            MediaModel mediaModel=Utility.getAllMedia(this);
+            videodata=mediaModel.getListHashMap();
             String[] keyset= (String[]) videodata.keySet().toArray(new String[videodata.size()]);
+            latestvideo = Utility.checklatest(this,videodata,mediaModel.getIdlist());
+            Arrays.sort(keyset, new Comparator<String>() {
+                @Override
+                public int compare(String s1, String s2) {
+                    return s1.toLowerCase().compareTo(s2.toLowerCase());
+                }
+            });
+
+
             myListAdapter.setListdata(keyset);
             myListAdapter.notifyDataSetChanged();
         }
@@ -87,42 +124,8 @@ public class FolderActivity extends AppCompatActivity {
             //permission denied
         }
     }
-    public HashMap<String, List<VideoModel>> getAllMedia() {
-        HashMap<String, List<VideoModel>> listHashMap=new HashMap<>();
 
-        String[] projection = { MediaStore.Video.VideoColumns.DATA ,MediaStore.Video.Media.DISPLAY_NAME,MediaStore.Video.Media._ID,MediaStore.Video.Media.WIDTH,MediaStore.Video.Media.HEIGHT};
-        Cursor cursor = getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
-        try {
-            cursor.moveToFirst();
-            do{
-                int columnIndex = cursor
-                        .getColumnIndexOrThrow(MediaStore.Video.Media._ID);
-                int id = cursor.getInt(columnIndex);
-                //Bitmap bitmap= MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(),id,MediaStore.Video.Thumbnails.MICRO_KIND,null);
-                String path= cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
-               boolean islandscape=cursor.getInt(3)>cursor.getInt(4);
 
-                String[] divide=path.split("/");
-                String foldername=divide[divide.length-2];
-
-                VideoModel videoModel=new VideoModel(path,id,cursor.getString(1),islandscape);
-                if(listHashMap.containsKey(foldername)){
-                    listHashMap.get(foldername).add(videoModel);
-                }
-                else {
-                    ArrayList<VideoModel> modelArrayList=new ArrayList<>();
-                    modelArrayList.add(videoModel);
-                    listHashMap.put(foldername,modelArrayList);
-                }
-
-            }while(cursor.moveToNext());
-            cursor.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return listHashMap;
-    }
     public static int getExifOrientation(String filepath) {// YOUR MEDIA PATH AS STRING
         int degree = 0;
         ExifInterface exif = null;
@@ -156,10 +159,12 @@ public class FolderActivity extends AppCompatActivity {
         // RecyclerView recyclerView;
         public MyListAdapter(String[] listdata) {
             this.listdata = listdata;
+
         }
 
         public void setListdata(String[] listdata) {
             this.listdata = listdata;
+
         }
 
         @NonNull
@@ -174,8 +179,18 @@ public class FolderActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
 
-            holder.foldernameview.setText(listdata[position]);
+            String foldername = listdata[position];
+            String capatilize=foldername.substring(0,1).toUpperCase()+foldername.substring(1).toLowerCase();
+            holder.foldernameview.setText(capatilize);
             holder.noofvideoview.setText(videodata.get(listdata[position]).size()+" videos");
+            if(latestvideo.containsKey(listdata[position])){
+                holder.badgeview.setText(latestvideo.get(listdata[position]).size()+"");
+                holder.badgeview.setVisibility(View.VISIBLE);
+
+            }
+            else {
+                holder.badgeview.setVisibility(View.INVISIBLE);
+            }
 
 //            final MyListData myListData = listdata[position];
 //            holder.textView.setText(listdata[position].getDescription());
@@ -197,10 +212,12 @@ public class FolderActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder {
             public TextView foldernameview;
             public TextView noofvideoview;
+            public TextView badgeview;
             public ViewHolder(View itemView) {
                 super(itemView);
                 this.foldernameview = (TextView) itemView.findViewById(R.id.foldername);
                 this.noofvideoview = (TextView) itemView.findViewById(R.id.noofvideo);
+                this.badgeview=itemView.findViewById(R.id.badgeview);
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

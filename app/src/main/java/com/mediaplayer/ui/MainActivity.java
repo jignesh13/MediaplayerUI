@@ -2,6 +2,7 @@ package com.mediaplayer.ui;
 
 import android.content.AttributionSource;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -45,6 +46,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import androidx.annotation.NonNull;
@@ -810,7 +812,14 @@ public class MainActivity extends AppCompatActivity {
         startPlayer();
     }
     public void intializePlayer() {
-
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref",MODE_PRIVATE);
+        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+        Gson gson=new Gson();
+        Type listOfdoctorType = new TypeToken<HashMap<String, String>>() {}.getType();
+        HashMap<String, String>   lastids = gson.fromJson(sharedPreferences.getString("storedata",""),listOfdoctorType );
+        lastids.put(videoModels.get(currentitem).getMediaid()+"","1");
+        myEdit.putString("storedata",gson.toJson(lastids));
+        myEdit.commit();
 
         Uri uri = Uri.parse(videoModels.get(currentitem).getUrl());
         MediaItem mediaItem = MediaItem.fromUri(uri);

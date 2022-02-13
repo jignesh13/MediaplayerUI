@@ -4,18 +4,19 @@ public class VideoModel {
     private  String url;
     private  int mediaid;
     private  String name;
-    private boolean islandscape;
+    private String duration;
 
-    public VideoModel(String url, int mediaid, String name,boolean islandscape) {
+
+    public VideoModel(String url, int mediaid, String name,String duration) {
         this.url = url;
         this.mediaid = mediaid;
         this.name = name;
-        this.islandscape=islandscape;
+        this.duration=duration;
     }
 
 
-    public boolean islandscape() {
-        return islandscape;
+    public String getDuration() {
+        return duration;
     }
 
     public String getUrl() {
