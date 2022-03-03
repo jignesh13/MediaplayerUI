@@ -49,6 +49,8 @@ https://raw.githubusercontent.com/jignesh13/MediaplayerUI/jignesh13-patch-1/app-
   
 ## License
    Copyright 2022 jignesh khunt
+   
+   [License](https://github.com/jignesh13/MediaplayerUI/blob/master/LICENSE)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
