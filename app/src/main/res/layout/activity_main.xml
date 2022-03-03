@@ -31,6 +31,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/topview"
         android:fitsSystemWindows="true"
         >
         <RelativeLayout
@@ -382,6 +383,7 @@
                 android:thumb="@drawable/thumb_image"
                 android:maxHeight="4dp"
                 android:thumbOffset="0dp"
+                android:layout_marginBottom="8dp"
                 android:progressDrawable="@drawable/seekbar_progress_style"
                 app:layout_constraintBottom_toTopOf="@+id/imageButton"
                 app:layout_constraintEnd_toStartOf="@+id/endprogress"

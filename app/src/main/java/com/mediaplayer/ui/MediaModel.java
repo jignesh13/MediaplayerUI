@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MediaModel {
-   private HashMap<String, List<VideoModel>> listHashMap;
-   private HashMap<String,String> idlist;
+    private HashMap<String, List<VideoModel>> listHashMap;
+    private HashMap<String,String> idlist;
 
 
     public MediaModel(HashMap<String, List<VideoModel>> listHashMap, HashMap<String,String> idlist) {

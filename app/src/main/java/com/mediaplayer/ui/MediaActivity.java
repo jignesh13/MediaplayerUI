@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -54,20 +55,20 @@ public class MediaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media);
-       Toolbar toolbar=findViewById(R.id.toolbar);
+        Toolbar toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Bundle bundle=getIntent().getExtras();
         if(bundle!=null){
             foldername=bundle.getString("foldername");
-          getSupportActionBar().setTitle(foldername);
+            getSupportActionBar().setTitle(foldername);
 //            Gson gson = new Gson();
 //            Type listOfdoctorType = new TypeToken<ArrayList<VideoModel>>() {}.getType();
 //           videoModels = gson.fromJson(bundle.getString("jsondata"),listOfdoctorType );
 
         }
-         recyclerView=findViewById(R.id.mediarecyclerview);
+        recyclerView=findViewById(R.id.mediarecyclerview);
         final GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -89,15 +90,19 @@ public class MediaActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         MediaModel mediaModel= Utility.getAllMedia(this);
         videoModels= (ArrayList<VideoModel>) mediaModel.getListHashMap().get(foldername);
         if(videoModels==null)videoModels=new ArrayList<>();
-       Collections.sort(videoModels, new Comparator<VideoModel>() {
-           @Override
-           public int compare(VideoModel t1, VideoModel t2) {
-               return t1.getName().toLowerCase().compareTo(t2.getName().toLowerCase());
-           }
-       });
+        for (VideoModel model:videoModels) {
+            Log.e("name",model.getName()+"j");
+        }
+        Collections.sort(videoModels, new Comparator<VideoModel>() {
+            @Override
+            public int compare(VideoModel t1, VideoModel t2) {
+                return t1.getName().toLowerCase().compareTo(t2.getName().toLowerCase());
+            }
+        });
 
         latestid=Utility.checklatest(this,mediaModel.getListHashMap(),mediaModel.getIdlist()).get(foldername);
         Log.e("latestid",latestid+"");
@@ -138,7 +143,7 @@ public class MediaActivity extends AppCompatActivity {
                     .load(videoModels.get(position).getUrl())
                     .transform(new CenterCrop(),new RoundedCorners(20))
                     .placeholder(R.drawable.placeholder)
-                 .into(holder.thumbnail);
+                    .into(holder.thumbnail);
             holder.titletext.setText(videoModels.get(position).getName());
             holder.durationtext.setText(videoModels.get(position).getDuration());
             if(latestid.contains(videoModels.get(position).getMediaid()+"")){
@@ -171,14 +176,15 @@ public class MediaActivity extends AppCompatActivity {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                     Bundle bundle =   MediaActivity.this.getIntent().getExtras();
-                     if(bundle!=null){
-                         Gson gson=new Gson();
-                         Intent intent=new Intent(MediaActivity.this,MainActivity.class);
-                         intent.putExtra("jsondata",gson.toJson(videoModels));
-                         intent.putExtra("pos",getAdapterPosition());
-                         startActivity(intent);
-                     }
+                        Bundle bundle =   MediaActivity.this.getIntent().getExtras();
+                        if(bundle!=null){
+
+                            Gson gson=new Gson();
+                            Intent intent=new Intent(MediaActivity.this,MainActivity.class);
+                            intent.putExtra("jsondata",gson.toJson(videoModels));
+                            intent.putExtra("pos",getAdapterPosition());
+                            startActivity(intent);
+                        }
                     }
                 });
 

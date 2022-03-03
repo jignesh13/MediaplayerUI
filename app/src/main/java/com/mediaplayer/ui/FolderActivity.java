@@ -81,7 +81,7 @@ public class FolderActivity extends AppCompatActivity {
             videodata=mediaModel.getListHashMap();
             String[] keyset= (String[]) videodata.keySet().toArray(new String[videodata.size()]);
 
-           latestvideo = Utility.checklatest(this,videodata,mediaModel.getIdlist());
+            latestvideo = Utility.checklatest(this,videodata,mediaModel.getIdlist());
             Arrays.sort(keyset, new Comparator<String>() {
                 @Override
                 public int compare(String s1, String s2) {
@@ -90,8 +90,8 @@ public class FolderActivity extends AppCompatActivity {
             });
             Log.e("latestinfo",keyset.toString());
 
-           myListAdapter.setListdata(keyset);
-           myListAdapter.notifyDataSetChanged();
+            myListAdapter.setListdata(keyset);
+            myListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -233,5 +233,4 @@ public class FolderActivity extends AppCompatActivity {
         }
     }
 }
-
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -25,12 +26,15 @@ public class Utility {
         try {
             cursor.moveToFirst();
             do{
+                if(cursor.getString(1)==null)continue;
                 int columnIndex = cursor
                         .getColumnIndexOrThrow(MediaStore.Video.Media._ID);
                 int id = cursor.getInt(columnIndex);
                 //Bitmap bitmap= MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(),id,MediaStore.Video.Thumbnails.MICRO_KIND,null);
                 String path= cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                Log.e(path,cursor.getString(1)+"j");
                 idhash.put(id+"","1");
+
 
                 String[] divide=path.split("/");
                 String foldername=divide[divide.length-2];
@@ -80,7 +84,7 @@ public class Utility {
         String[] keyset= (String[]) videodata.keySet().toArray(new String[videodata.size()]);
         SharedPreferences sharedPreferences = context.getSharedPreferences("MySharedPref",MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
-         HashMap<String,List<String>> latestvideo=new HashMap<>();
+        HashMap<String,List<String>> latestvideo=new HashMap<>();
         latestvideo.clear();
 
 
