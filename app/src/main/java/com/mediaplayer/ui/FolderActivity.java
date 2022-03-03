@@ -50,6 +50,13 @@ public class FolderActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folder);
+        findViewById(R.id.privacytext).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(FolderActivity.this,PrivacyActivity.class);
+                startActivity(intent);
+            }
+        });
         Toolbar toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");

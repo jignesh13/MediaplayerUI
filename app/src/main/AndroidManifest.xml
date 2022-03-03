@@ -22,6 +22,8 @@
         </activity>
         <activity android:name=".MainActivity" android:theme="@style/Theme.MyApplication"    android:configChanges="orientation|keyboardHidden|screenSize"
             ></activity>
+        <activity android:name=".PrivacyActivity" android:theme="@style/foldertheme"></activity>
+
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS"

@@ -79,15 +79,15 @@ public class MainActivity extends AppCompatActivity {
     private long currentitemseek;
     private boolean isdonebyus;
     private int ontouchpos;
-    private static boolean isplaybackground;
-    private static boolean isorientionchange;
-    private static int resizemode=0;
+    private  boolean isplaybackground;
+    private  boolean isorientionchange;
+    private  int resizemode=0;
     private boolean isscalegesture;
     private TextView videotitle;
-    private float savebright=-1.0f;
+    private  float savebright=-1.0f;
     private  Handler hidehandler;
-    private static boolean islock;
-    private static int playbackspeed=5;
+    private  boolean islock;
+    private  int playbackspeed=5;
     private ArrayList<VideoModel> videoModels = new ArrayList<>();
 
     private String[] aspectmode={"FIT","FILL","ZOOM","FIXED HEIGHT","FIXED WIDTH"};
@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         super.onCreate(savedInstanceState);
+        Log.e("oncreate", "oncreate");
         scaleFactor=1.0f;
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -133,37 +134,35 @@ public class MainActivity extends AppCompatActivity {
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        Log.e("resource", resource.getWidth() + "," + resource.getHeight());
-                        boolean islandscape = resource.getWidth() > resource.getHeight();
-                        int orientation = MainActivity.this.getResources().getConfiguration().orientation;
-                        if(isorientionchange){
-                            initview();
-                            isorientionchange=false;
-                        }
-                        else {
 
+
+                            boolean islandscape = resource.getWidth() > resource.getHeight();
+                            int orientation = MainActivity.this.getResources().getConfiguration().orientation;
+                            Log.e("resource", resource.getWidth() + "," + resource.getHeight()+","+orientation);
                             isorientionchange=false;
                             if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                rotate();
-                                initview();
-                                return;
+                                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                                    initview();
+                                    return;
 
+                                }
+                                else if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                    initview();
+                                    return;
+
+
+                                }
+                                else{
+
+                                    initview();
+                                    return;
+
+                                }
                             }
-                            else if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                                initview();
-                                return;
 
 
-                            }
-                            else{
 
-                                initview();
-                                return;
 
-                            }
-                        }
-
-                    }
                 });
 
         // startPlayer();
@@ -176,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         if(orientation==Configuration.ORIENTATION_LANDSCAPE){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
         }
-        super.onBackPressed();
+        finish();
     }
 
     public void initview(){
@@ -194,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setAttributes(lp);
         }
 
-        Log.e("oncreate", "oncreate");
+
 
         View speedView=findViewById(R.id.speedview);
         isshow = false;
@@ -843,6 +842,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     void rotate(){
+        Log.e("rotate","rotate");
         int orientation = MainActivity.this.getResources().getConfiguration().orientation;
         isorientionchange=true;
 
