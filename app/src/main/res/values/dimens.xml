@@ -2,4 +2,8 @@
 <resources>
     <dimen name="widthmeasure">180dp</dimen>
     <dimen name="spacing">12dp</dimen>
+    <dimen name="bottomspacesmall">16dp</dimen>
+    <dimen name="bottomspacelarge">90dp</dimen>
+
+
 </resources>

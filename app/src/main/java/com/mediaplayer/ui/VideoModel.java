@@ -7,6 +7,7 @@ public class VideoModel {
     private String duration;
 
 
+
     public VideoModel(String url, int mediaid, String name,String duration) {
         this.url = url;
         this.mediaid = mediaid;

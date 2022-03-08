@@ -20,6 +20,14 @@
     app:use_controller="false"
     android:id="@+id/player"
     >
+
+    <RelativeLayout
+        android:id="@+id/toucher"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:longClickable="false" />
 </com.google.android.exoplayer2.ui.PlayerView>
 
 
@@ -34,15 +42,6 @@
         android:id="@+id/topview"
         android:fitsSystemWindows="true"
         >
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:id="@+id/toucher"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:layout_above="@+id/bottomview"
-            android:longClickable="false"
-            android:background="@android:color/transparent"
-            />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -468,10 +467,58 @@
             android:textSize="55sp"
             android:fontFamily="@font/lato_black"
             />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/roundbg"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:paddingTop="5dp"
+            android:id="@+id/continuelay"
+            android:paddingRight="8dp"
+            android:gravity="center"
+            android:layout_marginLeft="12dp"
+            android:paddingBottom="5dp"
+            >
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginLeft="12dp"
+                android:src="@drawable/ic_baseline_close_24"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/continuetextid"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:fontFamily="@font/lato_regular"
+                android:layout_marginLeft="8dp"
+                android:text="Continue from\nwhere you stopped."
+                />
+           <Button
+               android:layout_width="wrap_content"
+               android:layout_height="30dp"
+               android:textSize="14sp"
+               android:fontFamily="@font/lato_regular"
+               android:text="Start Over"
+               android:onClick="startFromBegin"
+               android:textColor="@color/primaryColor"
+               android:layout_marginLeft="16dp"
+               android:background="@android:color/transparent"
 
+               />
+
+
+        </LinearLayout>
 
 
     </RelativeLayout>
+
+
+
     <ImageView
         android:id="@+id/unlockbtn"
         android:layout_width="50dp"

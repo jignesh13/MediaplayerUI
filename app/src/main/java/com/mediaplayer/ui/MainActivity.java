@@ -19,9 +19,12 @@ import android.util.Size;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -85,19 +88,23 @@ public class MainActivity extends AppCompatActivity {
     private boolean isscalegesture;
     private TextView videotitle;
     private  float savebright=-1.0f;
+    private View startoverview;
     private  Handler hidehandler;
     private  boolean islock;
     private  int playbackspeed=5;
     private ArrayList<VideoModel> videoModels = new ArrayList<>();
+    private SharedPreferences sharedPreferences;
+    private TextView continuetextid;
+    private LinearLayout continuelay;
 
     private String[] aspectmode={"FIT","FILL","ZOOM","FIXED HEIGHT","FIXED WIDTH"};
     private int[] resource={R.drawable.ic_zoom_stretch,R.drawable.ic_baseline_crop_3_2_24,R.drawable.ic_crop_white_24dp,R.drawable.ic_zoom_inside,R.drawable.ic_zoom_original};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
         Log.e("oncreate", "oncreate");
+        sharedPreferences = getSharedPreferences("MySharedPref",MODE_PRIVATE);
         scaleFactor=1.0f;
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -168,7 +175,18 @@ public class MainActivity extends AppCompatActivity {
         // startPlayer();
 
     }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // TODO Auto-generated method stub
+        super.onConfigurationChanged(newConfig);
+        if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
+            continuetextid.setText("Continue from where you stopped.");
+        }
+        else {
+            continuetextid.setText("Continue from\nwhere you stopped.");
+        }
 
+    }
     @Override
     public void onBackPressed() {
         int orientation = MainActivity.this.getResources().getConfiguration().orientation;
@@ -181,6 +199,8 @@ public class MainActivity extends AppCompatActivity {
     public void initview(){
 
         setContentView(R.layout.activity_main);
+        continuetextid=findViewById(R.id.continuetextid);
+        continuelay=findViewById(R.id.continuelay);
         findViewById(R.id.backarrow).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -209,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         TextView currentprogresslbl = findViewById(R.id.currentprogress);
         TextView endprogresslbl = findViewById(R.id.endprogress);
         View bottomview = findViewById(R.id.bottomview);
+        
         View touchview = findViewById(R.id.toucher);
         View seeklay = findViewById(R.id.seeklay);
         TextView seektime = findViewById(R.id.seektime);
@@ -242,6 +263,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (currentitem+1<videoModels.size()) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putLong(videoModels.get(currentitem).getMediaid()+"",player.getCurrentPosition());
+                    editor.commit();
                     currentitem++;
                     Glide.with(MainActivity.this)
                             .asBitmap()
@@ -293,7 +317,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (currentitem-1>=0) {
-
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putLong(videoModels.get(currentitem).getMediaid()+"",player.getCurrentPosition());
+                    editor.commit();
                     currentitem--;
                     Glide.with(MainActivity.this)
                             .asBitmap()
@@ -354,6 +380,7 @@ public class MainActivity extends AppCompatActivity {
                 if (player.isPlaying()) {
                     hideSystemUI();
                     bottomview.setVisibility(View.GONE);
+
                     toolbar.setVisibility(View.GONE);
                 }
             }
@@ -405,6 +432,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPlaybackStateChanged(int playbackState) {
+                Log.e("state",playbackState+"");
                 if(playbackState==Player.STATE_ENDED){
                     Log.e("Ended","end");
                     if(currentitem+1<videoModels.size()){
@@ -821,6 +849,8 @@ public class MainActivity extends AppCompatActivity {
 
         startPlayer();
     }
+
+
     public void intializePlayer() {
         SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref",MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
@@ -833,7 +863,20 @@ public class MainActivity extends AppCompatActivity {
 
         Uri uri = Uri.parse(videoModels.get(currentitem).getUrl());
         MediaItem mediaItem = MediaItem.fromUri(uri);
-        player.setMediaItem(mediaItem,currentitemseek);
+        long currentseek=sharedPreferences.getLong(videoModels.get(currentitem).getMediaid()+"",0);
+        if(currentseek>0){
+            continuelay.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    continuelay.setVisibility(View.GONE);
+                }
+            },5000);
+        }
+        else {
+            continuelay.setVisibility(View.GONE);
+        }
+        player.setMediaItem(mediaItem,currentseek);
         currentitemseek=0;
         videotitle.setText(videoModels.get(currentitem).getName());
         player.prepare();
@@ -854,6 +897,12 @@ public class MainActivity extends AppCompatActivity {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
         }
     }
+
+    public void startFromBegin(View view) {
+        player.seekTo(0);
+        continuelay.setVisibility(View.GONE);
+    }
+
     public class MyOnScaleGestureListener extends
             ScaleGestureDetector.SimpleOnScaleGestureListener {
 
@@ -960,6 +1009,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(videoModels.get(currentitem).getMediaid()+"",player.getCurrentPosition());
+        editor.commit();
         if(!isplaybackground)pausePlayer();
 
     }
@@ -1079,17 +1131,29 @@ public class MainActivity extends AppCompatActivity {
                         // Hide the nav bar and status bar
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        if(continuelay!=null){
+            RelativeLayout.LayoutParams layoutParams= (RelativeLayout.LayoutParams) continuelay.getLayoutParams();
+            layoutParams.setMargins(layoutParams.leftMargin,layoutParams.topMargin,layoutParams.rightMargin,getResources().getDimensionPixelSize(R.dimen.bottomspacesmall));
+            continuelay.setLayoutParams(layoutParams);
+        }
+
 
     }
 
     private void showSystemUI() {
         isshow = true;
-//
         Log.e("hide", "show");
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+        if(continuelay!=null){
+            RelativeLayout.LayoutParams layoutParams= (RelativeLayout.LayoutParams) continuelay.getLayoutParams();
+            layoutParams.setMargins(layoutParams.leftMargin,layoutParams.topMargin,layoutParams.rightMargin,getResources().getDimensionPixelSize(R.dimen.bottomspacelarge));
+            continuelay.setLayoutParams(layoutParams);
+        }
+
     }
 }

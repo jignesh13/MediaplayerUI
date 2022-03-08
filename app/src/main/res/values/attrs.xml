@@ -7,5 +7,6 @@
         <attr name="progesscolor" format="color"/>
         <attr name="progress" format="integer"/>
         <attr name="maxprogress" format="integer"/>
+
     </declare-styleable>
 </resources>

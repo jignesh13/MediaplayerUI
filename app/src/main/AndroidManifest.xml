@@ -12,8 +12,8 @@
 
         android:theme="@style/maintheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MediaActivity" android:theme="@style/foldertheme"  android:configChanges="orientation|keyboardHidden|screenSize"></activity>
-        <activity android:name=".FolderActivity" android:theme="@style/foldertheme"      android:configChanges="orientation|keyboardHidden|screenSize">
+        <activity android:name=".MediaActivity" android:theme="@style/foldertheme"  android:configChanges="orientation|keyboardHidden|screenSize"/>
+        <activity android:name=".FolderActivity" android:theme="@style/foldertheme" android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,15 +21,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" android:theme="@style/Theme.MyApplication"    android:configChanges="orientation|keyboardHidden|screenSize"
-            ></activity>
-        <activity android:name=".PrivacyActivity" android:theme="@style/foldertheme"></activity>
+            />
+        <activity android:name=".PrivacyActivity" android:theme="@style/foldertheme"/>
 
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
-
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>
