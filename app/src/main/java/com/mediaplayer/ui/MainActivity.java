@@ -143,29 +143,29 @@ public class MainActivity extends AppCompatActivity {
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
 
 
-                            boolean islandscape = resource.getWidth() > resource.getHeight();
-                            int orientation = MainActivity.this.getResources().getConfiguration().orientation;
-                            Log.e("resource", resource.getWidth() + "," + resource.getHeight()+","+orientation);
-                            isorientionchange=false;
-                            if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                                    initview();
-                                    return;
+                        boolean islandscape = resource.getWidth() > resource.getHeight();
+                        int orientation = MainActivity.this.getResources().getConfiguration().orientation;
+                        Log.e("resource", resource.getWidth() + "," + resource.getHeight()+","+orientation);
+                        isorientionchange=false;
+                        if (islandscape && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                            initview();
+                            return;
 
-                                }
-                                else if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                                    initview();
-                                    return;
+                        }
+                        else if (!islandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            initview();
+                            return;
 
 
-                                }
-                                else{
+                        }
+                        else{
 
-                                    initview();
-                                    return;
+                            initview();
+                            return;
 
-                                }
-                            }
+                        }
+                    }
 
 
 
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
         TextView currentprogresslbl = findViewById(R.id.currentprogress);
         TextView endprogresslbl = findViewById(R.id.endprogress);
         View bottomview = findViewById(R.id.bottomview);
-        
+
         View touchview = findViewById(R.id.toucher);
         View seeklay = findViewById(R.id.seeklay);
         TextView seektime = findViewById(R.id.seektime);
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.rotateview).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               rotate();
+                rotate();
             }
         });
         findViewById(R.id.imageButton2).setOnClickListener(new View.OnClickListener() {

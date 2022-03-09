@@ -9,26 +9,18 @@
 
 
 
-<com.google.android.exoplayer2.ui.PlayerView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:auto_show="false"
-    android:clickable="false"
-    app:resize_mode="fit"
-    android:scaleX="1"
-    android:scaleY="1"
-    app:use_controller="false"
-    android:id="@+id/player"
-    >
-
-    <RelativeLayout
-        android:id="@+id/toucher"
+    <com.google.android.exoplayer2.ui.PlayerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:clickable="true"
-        android:longClickable="false" />
-</com.google.android.exoplayer2.ui.PlayerView>
+        app:auto_show="false"
+        android:clickable="false"
+        app:resize_mode="fit"
+        android:scaleX="1"
+        android:scaleY="1"
+        app:use_controller="false"
+        android:id="@+id/player"
+        >
+    </com.google.android.exoplayer2.ui.PlayerView>
 
 
 
@@ -39,9 +31,17 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/topview"
         android:fitsSystemWindows="true"
         >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:id="@+id/toucher"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:layout_above="@+id/bottomview"
+            android:longClickable="false"
+            android:background="@android:color/transparent"
+            />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -195,7 +195,7 @@
             android:background="@drawable/roundview"
             android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
-           >
+            >
 
             <com.mediaplayer.ui.SoundView
                 android:id="@+id/volumeview"
@@ -358,7 +358,7 @@
             android:background="@drawable/gradientbottom"
             android:paddingTop="12dp"
             android:layout_alignParentBottom="true"
-           >
+            >
 
 
             <TextView
@@ -382,7 +382,6 @@
                 android:thumb="@drawable/thumb_image"
                 android:maxHeight="4dp"
                 android:thumbOffset="0dp"
-                android:layout_marginBottom="8dp"
                 android:progressDrawable="@drawable/seekbar_progress_style"
                 app:layout_constraintBottom_toTopOf="@+id/imageButton"
                 app:layout_constraintEnd_toStartOf="@+id/endprogress"
@@ -467,6 +466,7 @@
             android:textSize="55sp"
             android:fontFamily="@font/lato_black"
             />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -498,27 +498,23 @@
                 android:layout_marginLeft="8dp"
                 android:text="Continue from\nwhere you stopped."
                 />
-           <Button
-               android:layout_width="wrap_content"
-               android:layout_height="30dp"
-               android:textSize="14sp"
-               android:fontFamily="@font/lato_regular"
-               android:text="Start Over"
-               android:onClick="startFromBegin"
-               android:textColor="@color/primaryColor"
-               android:layout_marginLeft="16dp"
-               android:background="@android:color/transparent"
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:textSize="14sp"
+                android:fontFamily="@font/lato_regular"
+                android:text="Start Over"
+                android:onClick="startFromBegin"
+                android:textColor="@color/primaryColor"
+                android:layout_marginLeft="16dp"
+                android:background="@android:color/transparent"
 
-               />
+                />
 
 
         </LinearLayout>
 
-
     </RelativeLayout>
-
-
-
     <ImageView
         android:id="@+id/unlockbtn"
         android:layout_width="50dp"
