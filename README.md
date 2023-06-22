@@ -1,5 +1,5 @@
-# JK Player
-JK Player is Powerful video player which play video on your device with advanced hardware acceleration
+# JK Player(Android Video Player)
+JK Player is Powerful video player Which is best alternative of MX Player
 ## Demo
 
 https://user-images.githubusercontent.com/20221469/152984171-59d99c98-ca89-4b1b-b312-30ace1b9e5cb.mp4
@@ -8,36 +8,20 @@ https://user-images.githubusercontent.com/20221469/152984171-59d99c98-ca89-4b1b-
 
 https://raw.githubusercontent.com/jignesh13/MediaplayerUI/jignesh13-patch-1/app-debug.apk
 
- ## feature
-✔️ Hardware acceleration can be applied in JK Player for faster decoding and perfomance improvement
 
-✔️ JK Player is the video player which supports multi-core decoding.
+This repository contains an Android Video Player project that provides a customizable and feature-rich video playback experience for Android applications. The player supports various video formats, offers playback controls, and allows integration with custom UI designs.
 
-✔️ Easily maintain different aspect ratio of video
+## Features
 
-✔️ Using touch gestures throw maintain video sound same like MX Player
-
-✔️ Using touch gestures throw maintain video seek position same like MX Player
-
-✔️ maintain scale of video player using scalegesture
-
-✔️ Normal and full screen display
-
-✔️ maintain playlist of video
-
-✔️ automatically maintain screen oriention based on video size
-
-✔️ No ads or annoying popups
-
-✔️ Child lock without worry for your kids to make phone call or sms
-
-✔️ supported video format mp4, mkv, M4A, FMP4, FLV etc
-
-✔️ No internet access needed, giving you more privacy & security
-
-✔️ Only the bare minimum permissions required
-
-✔️ Open source
+- Supports playback of popular video formats including MP4, AVI, MKV, and more.
+- Customizable UI elements including play/pause buttons, seek bar, fullscreen mode, etc.
+- Seamless integration with external video sources such as URLs or local storage.
+- Playback control options including play, pause, seek, volume control, and video looping.
+- Gesture-based controls for seeking, adjusting volume, and brightness.
+- Error handling and playback state management.
+- Support for subtitles and multiple audio tracks.
+- Integration with media controllers and notifications for background playback.
+- Sample app with examples demonstrating usage and customization options.
 
  # Special thanks to these contributors
 [Exoplayer](https://github.com/google/ExoPlayer)
