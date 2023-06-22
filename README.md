@@ -1,5 +1,8 @@
 # JK Player(Android Video Player)
 JK Player is Powerful video player Which is best alternative of MX Player
+
+This repository contains an Android Video Player project that provides a customizable and feature-rich video playback experience for Android applications. The player supports various video formats, offers playback controls, and allows integration with custom UI designs.
+
 ## Demo
 
 https://user-images.githubusercontent.com/20221469/152984171-59d99c98-ca89-4b1b-b312-30ace1b9e5cb.mp4
@@ -8,8 +11,8 @@ https://user-images.githubusercontent.com/20221469/152984171-59d99c98-ca89-4b1b-
 
 https://raw.githubusercontent.com/jignesh13/MediaplayerUI/jignesh13-patch-1/app-debug.apk
 
-
-This repository contains an Android Video Player project that provides a customizable and feature-rich video playback experience for Android applications. The player supports various video formats, offers playback controls, and allows integration with custom UI designs.
+## Youtube
+https://www.youtube.com/watch?v=CMQvlqOH7Tg
 
 ## Features
 
